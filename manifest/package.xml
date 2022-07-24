@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Package xmlns="http://soap.sforce.com/2006/04/metadata">
+    <types>
+        <members>OrgRefresherHelper</members>
+        <name>ApexClass</name>
+    </types>
+    <types>
+        <members>orgSetupHome</members>
+        <members>ldsUtils</members>
+        <members>lwcUtility</members>
+        <members>dataFetcher</members>
+        <members>disableScheduledApexJobs</members>
+        <members>styleLibrary</members>
+        <name>LightningComponentBundle</name>
+    </types>
+    <types>
+        <members>Tooling_API</members>
+        <name>NamedCredential</name>
+    </types>
+    <types>
+        <members>Salesforce</members>
+        <name>AuthProvider</name>
+    </types>
+    <version>51.0</version>
+</Package>
