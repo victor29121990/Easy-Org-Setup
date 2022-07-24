@@ -1,0 +1,53 @@
+<template>
+    <template if:true={loading}>
+        <div>
+            <lightning-spinner alternative-text="Loading" size="medium" variant="brand"></lightning-spinner>
+        </div>
+    </template>
+    <div class="slds-modal__header slds-p-horizontal--none slds-p-vertical_medium">
+        <h2 class="slds-text-heading--medium">{headerText}</h2>
+        <lightning-button-icon icon-name="utility:refresh" alternative-text="refresh" title="Refresh"
+            class="refresh-button" onclick={refresh}></lightning-button-icon>
+    </div>
+    <div class="formVerticalScroller slds-modal__content relative">
+        <ul>
+            <li class="headerItem">
+                <lightning-input type="checkbox" checked="true" onchange={selectAllToggle} class="width10">
+                </lightning-input>
+                <span class="width60">Workflow Rule Name</span>
+                <span class="width10">Active?</span>
+                <span class="width10">Status</span>
+            </li>
+            <template for:each={_filteredWorkflowRules} for:item="eachWorkflow">
+                <li key={eachWorkflow.Id} class="listItem selectedListItem" data-id={eachWorkflow.Id}
+                    onclick={toggleSelection}>
+                    <lightning-input type="checkbox" checked={eachWorkflow.checked} onchange={handleSelectionChange}
+                        data-id={eachWorkflow.index} class="width10"></lightning-input>
+                    <span class="width60">{eachWorkflow.Name}</span>
+                    <lightning-input type="checkbox" checked={eachWorkflow.active} class="width10" disabled>
+                    </lightning-input>
+                    <template if:true={eachWorkflow.isInit}>
+                        <lightning-icon class="width10" icon-name="utility:clock" alternative-text="ready"
+                            size="x-small" title="ready"></lightning-icon>
+                    </template>
+                    <template if:true={eachWorkflow.isDone}>
+                        <lightning-icon class="width10" icon-name="utility:check" alternative-text="done" size="x-small"
+                            title="done"></lightning-icon>
+                    </template>
+                    <template if:true={eachWorkflow.isFailed}>
+                        <lightning-icon class="width10" icon-name="utility:warning" alternative-text="error"
+                            size="x-small" title={eachWorkflow.msg}></lightning-icon>
+                    </template>
+
+                </li>
+            </template>
+        </ul>
+    </div>
+    <div class="slds-modal__footer">
+        <lightning-button variant="success" class="footerButton" label="Disable" onclick={deactivateWorkflows}
+            disabled={disableDeactivateWorkflows}>
+        </lightning-button>
+        <lightning-button variant="neutral" class="footerButton" label="Cancel" onclick={cancel}>
+        </lightning-button>
+    </div>
+</template>
