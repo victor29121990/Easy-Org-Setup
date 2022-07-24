@@ -1,0 +1,55 @@
+<template>
+    <template if:true={loading}>
+        <div>
+            <lightning-spinner alternative-text="Loading" size="medium" variant="brand"></lightning-spinner>
+        </div>
+    </template>
+    <div class="slds-modal__header slds-p-horizontal--none slds-p-vertical_medium">
+        <h2 class="slds-text-heading--medium">{headerText}</h2>
+        <lightning-button-icon icon-name="utility:refresh" alternative-text="refresh" title="Refresh"
+            class="refresh-button" onclick={refresh}></lightning-button-icon>
+
+    </div>
+    <div class="formVerticalScroller slds-modal__content relative">
+        <ul>
+            <li class="headerItem">
+                <lightning-input type="checkbox" checked="true" onchange={selectAllToggle} class="width10">
+                </lightning-input>
+                <span class="width40">Job Name</span>
+                <span class="width40">Next Run</span>
+                <span class="width10">Status</span>
+            </li>
+            <template for:each={_allApexJobs} for:item="eachJob">
+                <li key={eachJob.Id} class="listItem">
+                    <lightning-input type="checkbox" checked={eachJob.checked} onchange={handleSelectionChange}
+                        data-id={eachJob.index} class="width10"></lightning-input>
+                    <span class="width40">{eachJob.CronJobDetail.Name}</span>
+                    <span class="width40">
+                        <lightning-formatted-date-time value={eachJob.NextFireTime} year="numeric" month="numeric"
+                            day="numeric" hour="2-digit" minute="2-digit">
+                        </lightning-formatted-date-time>
+                    </span>
+                    <template if:true={eachJob.isInit}>
+                        <lightning-icon class="width10" icon-name="utility:clock" alternative-text="ready"
+                            size="x-small" title="ready"></lightning-icon>
+                    </template>
+                    <template if:true={eachJob.isDone}>
+                        <lightning-icon class="width10" icon-name="utility:check" alternative-text="done" size="x-small"
+                            title="done"></lightning-icon>
+                    </template>
+                    <template if:true={eachJob.isFailed}>
+                        <lightning-icon class="width10" icon-name="utility:warning" alternative-text="error"
+                            size="x-small" title={eachJob.msg}></lightning-icon>
+                    </template>
+                </li>
+            </template>
+        </ul>
+    </div>
+    <div class="slds-modal__footer">
+        <lightning-button variant="success" class="footerButton" label="Disable" onclick={disableApexJobs}
+            disabled={disableDSAJ}>
+        </lightning-button>
+        <lightning-button variant="neutral" class="footerButton" label="Cancel" onclick={cancel}>
+        </lightning-button>
+    </div>
+</template>
