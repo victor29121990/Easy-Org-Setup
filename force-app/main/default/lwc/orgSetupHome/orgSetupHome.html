@@ -1,0 +1,274 @@
+<template>
+  <div class="centered bordered">
+    <div class="welcomeDiv">
+      <p>Welcome {name}, to Org Set up Tool</p>
+      <!--<p>Org Name: {orgName}</p>
+            <p>Org URL: {orgURL}</p>-->
+      <p>Org type: {orgType}</p>
+    </div>
+    <div style="display: inline-flex;" class="menu slds-size_1-of-1">
+      <ul class="slds-size_1-of-3">
+        <li data-id="DSAJ" onclick={navigateToScreen}>
+          Disable Scheduled Apex Jobs
+        </li>
+        <li data-id="DOWF" onclick={navigateToScreen}>
+          Disable Outbound Workflows
+        </li>
+        <li data-id="UOWF" onclick={navigateToScreen}>
+          Update outbound endpoints
+        </li>
+        <li data-id="REWSC" onclick={navigateToScreen}>
+          Reconfigure External Web Service calls
+        </li>
+        <li data-id="OCS" onclick={navigateToScreen}>
+          Overwrite Custom Settings
+        </li>
+        <li data-id="DAS" onclick={navigateToScreen}>
+          Disable Analytical/Reporting Snapshots
+        </li>
+      </ul>
+      <ul class="slds-size_1-of-3">
+        <li data-id="RES" onclick={navigateToScreen}>
+          Remove the email suffix for required users
+        </li>
+        <li data-id="CARU" onclick={navigateToScreen}>
+          Create any required users
+        </li>
+        <li data-id="RIES" onclick={navigateToScreen}>
+          Regenerate Inbound Email Services
+        </li>
+        <li data-id="DRSS" onclick={navigateToScreen}>
+          Delete / modify entries in Remote Site Settings
+        </li>
+        <li data-id="DNC" onclick={navigateToScreen}>
+          Same with Named credentials
+        </li>
+        <li data-id="DBDAO" onclick={navigateToScreen}>
+          Disable "Big Deal Alert" on Opportunities
+        </li>
+      </ul>
+      <ul class="slds-size_1-of-3">
+        <li data-id="SNCTDS" onclick={navigateToScreen}>
+          Send new credentials to downstream systems
+        </li>
+        <li data-id="SED" onclick={navigateToScreen}>
+          set Email Deliverability to "All Email"
+        </li>
+        <li data-id="MEACL" onclick={navigateToScreen}>
+          mask Email addresses on Contacts, Leads etc
+        </li>
+        <li data-id="DWDE" onclick={navigateToScreen}>
+          disable Weekly Data Export
+        </li>
+        <li data-id="DM" onclick={navigateToScreen}>Data Mask</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- modal start-->
+  <template if:true={showModal}>
+    <div role="dialog" tabindex="-1" aria-labelledby="header43" class="slds-modal slds-fade-in-open">
+      <div class={modalClass}>
+        <div class="formClass">
+          <!-- to move to chld-->
+          <template if:true={isLoading}>
+            <div>
+              <lightning-spinner alternative-text="Loading" size="medium" variant="brand"></lightning-spinner>
+            </div>
+          </template>
+          <!-- to move to child-->
+          <template if:true={isProcessing}>
+            <div class="slds-spinner_container">
+              <lightning-progress-bar value={progress} size="large" variant="circular" class="centerAlign">
+              </lightning-progress-bar>
+            </div>
+          </template>
+          <!--<div class="slds-modal__header slds-p-horizontal--none slds-p-vertical_medium">
+            <h2 class="slds-text-heading--medium">{currentSectionHeader}</h2>
+          </div>-->
+
+
+          <template if:true={showOCSScreen}>
+            <div class="slds-grid">
+              <lightning-combobox placeholder="Select Custom Setting" variant="label-hidden"
+                class="custom-setting-picklist" options={customSettingOptions} onchange={handleCSChange}>
+              </lightning-combobox>
+            </div>
+            <template if:false={showAsTable}>more than 5</template>
+            <template if:true={showAsTable}>
+              <table>
+                <thead>
+                  <tr class="tableHeader">
+                    <th style="text-align: center;">
+                      <lightning-input type="checkbox" checked={getFalse} onchange={selectAllToggle}>
+                      </lightning-input>
+                    </th>
+                    <template for:each={customSettingHeaders} for:item="header">
+                      <th key={header.api} class="cs-header">{header.label}</th>
+                    </template>
+                    <th class="cs-header"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <template for:each={recordsAsList} for:item="record" for:index="recordIndex">
+                    <tr key={record.Id} class="tableRow">
+                      <td style="text-align: center;">
+                        <lightning-input type="checkbox" checked={record.checked} onchange={handleSelectionChange}
+                          data-id={recordIndex}></lightning-input>
+                      </td>
+                      <template for:each={record.data} for:item="row">
+                        <td key={row.api} class="table-cell">
+                          <template if:true={row.isText}>
+                            <lightning-input type="text" variant="label-hidden" value={row.value} data-id={recordIndex}
+                              data-var={row.api} onchange={handleCSFieldValueChange}>
+                            </lightning-input>
+                          </template>
+                          <template if:true={row.isTextArea}>
+                            <lightning-textarea variant="label-hidden" value={row.value} data-id={recordIndex}
+                              data-var={row.api} onchange={handleCSFieldValueChange}></lightning-textarea>
+                          </template>
+                          <template if:true={row.isNumber}>
+                            <lightning-input type="number" variant="label-hidden" value={row.value}
+                              data-id={recordIndex} data-var={row.api} onchange={handleCSFieldValueChange}>
+                            </lightning-input>
+                          </template>
+                          <template if:true={row.isCheckbox}>
+                            <lightning-input type="checkbox" variant="label-hidden" checked={row.value}
+                              data-id={recordIndex} data-var={row.api} onchange={handleCSFieldValueChange}>
+                            </lightning-input>
+                          </template>
+
+                          <template if:true={row.isDate}>
+                            <lightning-input type="date" variant="label-hidden" value={row.value} data-id={recordIndex}
+                              data-var={row.api} onchange={handleCSFieldValueChange}>
+                            </lightning-input>
+                          </template>
+                          <template if:true={row.isDate}>
+                            <lightning-input type="datetime" variant="label-hidden" value={row.value}
+                              data-id={recordIndex} data-var={row.api} onchange={handleCSFieldValueChange}>
+                            </lightning-input>
+                          </template>
+                        </td>
+                      </template>
+                      <td class="table-cell">
+                        <template if:true={record.isInit}>
+                          <lightning-icon icon-name="utility:clock" alternative-text="ready" size="x-small"
+                            title="ready"></lightning-icon>
+                        </template>
+                        <template if:true={record.isDone}>
+                          <lightning-icon icon-name="utility:check" alternative-text="done" size="x-small" title="done">
+                          </lightning-icon>
+                        </template>
+                        <template if:true={record.isFailed}>
+                          <lightning-icon icon-name="utility:warning" alternative-text="error" size="x-small"
+                            title={record.msg}></lightning-icon>
+                        </template>
+                      </td>
+                    </tr>
+                  </template>
+                </tbody>
+              </table>
+            </template>
+            <!--<ul>
+                <li class="headerItem">
+                  <lightning-input type="checkbox" checked="true" onchange={selectAllToggle}
+                                    class="width5"></lightning-input>
+                  <span class="width45">Outbound Name</span>
+                  <span class="width43">Endpoint URL</span>
+                  <span style="width: 5%;">Status</span>
+                </li>
+                <template for:each={allOutboundMsgs} for:item="eachOutbound">
+                  <li key={eachOutbound.Id} class="listItem selectedListItem" data-id={eachOutbound.Id} onclick={toggleSelection}>
+                    <lightning-input type="checkbox" checked={eachOutbound.checked} onchange={handleSelectionChange}
+                                  data-id={eachOutbound.index} class="width5"></lightning-input>
+                    <span class="width45">{eachOutbound.Name}</span>
+                    <lightning-input type="text" variant="label-hidden" value={eachOutbound.endpointURL} 
+                              class="width43" data-id={eachOutbound.index} onchange={handleEndpointChange}></lightning-input>
+                    <template if:true={eachOutbound.isInit}>
+                      <lightning-icon class="width5" icon-name="utility:clock" alternative-text="ready" size="x-small"
+                            title="ready"></lightning-icon>
+                    </template>
+                    <template if:true={eachOutbound.isDone}>
+                      <lightning-icon class="width5" icon-name="utility:check" alternative-text="done" size="x-small"
+                            title="done"></lightning-icon>
+                    </template>
+                    <template if:true={eachOutbound.isFailed}>
+                      <lightning-icon class="width5" icon-name="utility:warning" alternative-text="error" size="x-small"
+                            title={eachOutbound.msg}></lightning-icon>
+                    </template>
+                    
+                  </li>
+                </template>
+              </ul>-->
+          </template>
+          <template if:true={showUOWFScreen}>
+            <ul>
+              <li class="headerItem">
+                <lightning-input type="checkbox" checked="true" onchange={selectAllToggle} class="width5">
+                </lightning-input>
+                <span class="width45">Outbound Name</span>
+                <span class="width43">Endpoint URL</span>
+                <span style="width: 5%;">Status</span>
+              </li>
+              <template for:each={allOutboundMsgs} for:item="eachOutbound">
+                <li key={eachOutbound.Id} class="listItem selectedListItem" data-id={eachOutbound.Id}
+                  onclick={toggleSelection}>
+                  <lightning-input type="checkbox" checked={eachOutbound.checked} onchange={handleSelectionChange}
+                    data-id={eachOutbound.index} class="width5"></lightning-input>
+                  <span class="width45">{eachOutbound.Name}</span>
+                  <lightning-input type="text" variant="label-hidden" value={eachOutbound.endpointURL} class="width43"
+                    data-id={eachOutbound.index} onchange={handleEndpointChange}></lightning-input>
+                  <template if:true={eachOutbound.isInit}>
+                    <lightning-icon class="width5" icon-name="utility:clock" alternative-text="ready" size="x-small"
+                      title="ready"></lightning-icon>
+                  </template>
+                  <template if:true={eachOutbound.isDone}>
+                    <lightning-icon class="width5" icon-name="utility:check" alternative-text="done" size="x-small"
+                      title="done"></lightning-icon>
+                  </template>
+                  <template if:true={eachOutbound.isFailed}>
+                    <lightning-icon class="width5" icon-name="utility:warning" alternative-text="error" size="x-small"
+                      title={eachOutbound.msg}></lightning-icon>
+                  </template>
+
+                  <!--<span class="width40">{eachOutbound.endpointURL}</span>-->
+                </li>
+              </template>
+            </ul>
+          </template>
+          <template if:true={showDOWFScreen}>
+            <c-disable-outbound-workflows oncancel={cancel}></c-disable-outbound-workflows>
+          </template>
+          <template if:true={showDSAJScreen}>
+            <c-disable-scheduled-apex-jobs oncancel={cancel}></c-disable-scheduled-apex-jobs>
+          </template>
+          <template if:true={showDASScreen}>
+            <c-disable-analytical-snapshots oncancel={cancel}></c-disable-analytical-snapshots>
+          </template>
+          <!--
+          <div class="slds-modal__footer">
+            <template if:true={showDOWFScreen}>
+              <lightning-button variant="success" class="footerButton" label="Disable" onclick={deactivateWorkflows}
+                disabled={disableDeactivateWorkflows}>
+              </lightning-button>
+            </template>
+            <template if:true={showUOWFScreen}>
+              <lightning-button variant="success" class="footerButton" label="Update" onclick={updateEndpoints}
+                disabled={disableUpdateEndpoints}>
+              </lightning-button>
+            </template>
+            <template if:true={showOCSScreen}>
+              <lightning-button variant="success" class="footerButton" label="Update" onclick={updateCustomSettings}
+                disabled={disableUpdateCS}>
+              </lightning-button>
+            </template>
+            <lightning-button variant="neutral" class="footerButton" label="Cancel" onclick={cancel}>
+            </lightning-button>
+          </div>
+        -->
+        </div>
+      </div>
+    </div>
+    <div class="slds-backdrop slds-backdrop--open"></div>
+  </template>
+</template>
